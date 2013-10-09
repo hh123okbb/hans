@@ -25,16 +25,25 @@
 #include <string.h>
 #include <arpa/inet.h>
 #include <syslog.h>
+#include <stdio.h>
 
 using namespace std;
 
 #define FIRST_ASSIGNED_IP_OFFSET 100
 
-const Worker::TunnelHeader::Magic Server::magic("hans");
+Worker::TunnelHeader::Magic Server::magic("hans");
 
-Server::Server(int tunnelMtu, const char *deviceName, const char *passphrase, uint32_t network, bool answerEcho, uid_t uid, gid_t gid, int pollTimeout)
+Server::Server(int tunnelMtu, const char *deviceName, const char *passphrase,
+        uint32_t network, bool answerEcho, uid_t uid, gid_t gid,
+        int pollTimeout, const char *magicPrefix)
     : Worker(tunnelMtu, deviceName, answerEcho, uid, gid), auth(passphrase)
 {
+    char m[16];
+    sprintf(m, "%sc", magicPrefix);
+    strcpy(Client::magic.data, m);
+    sprintf(m, "%ss", magicPrefix);
+    strcpy(Server::magic.data, m);
+
     this->network = network & 0xffffff00;
     this->pollTimeout = pollTimeout;
     this->latestAssignedIpOffset = FIRST_ASSIGNED_IP_OFFSET - 1;

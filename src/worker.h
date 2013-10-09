@@ -26,6 +26,7 @@
 
 #include <string>
 #include <sys/types.h>
+#include <stdio.h>
 
 class Worker
 {
@@ -49,7 +50,7 @@ protected:
             bool operator==(const Magic &other) const;
             bool operator!=(const Magic &other) const;
 
-            char data[4];
+            char data[16];
         };
 
         Magic magic;

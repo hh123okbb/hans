@@ -31,7 +31,9 @@
 class Server : public Worker
 {
 public:
-    Server(int tunnelMtu, const char *deviceName, const char *passphrase, uint32_t network, bool answerEcho, uid_t uid, gid_t gid, int pollTimeout);
+    Server(int tunnelMtu, const char *deviceName, const char *passphrase,
+            uint32_t network, bool answerEcho, uid_t uid, gid_t gid,
+            int pollTimeout, const char* magicPrefix);
     virtual ~Server();
 
     // change some time:
@@ -42,7 +44,7 @@ public:
         uint32_t desiredIp;
     };
 
-    static const Worker::TunnelHeader::Magic magic;
+    static Worker::TunnelHeader::Magic magic;
 
 protected:
     struct Packet

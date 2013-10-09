@@ -27,16 +27,24 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <syslog.h>
+#include <stdio.h>
 
 using namespace std;
 
-const Worker::TunnelHeader::Magic Client::magic("hanc");
+Worker::TunnelHeader::Magic Client::magic("hanc");
 
 Client::Client(int tunnelMtu, const char *deviceName, uint32_t serverIp,
                int maxPolls, const char *passphrase, uid_t uid, gid_t gid,
-               bool changeEchoId, bool changeEchoSeq, uint32_t desiredIp)
+               bool changeEchoId, bool changeEchoSeq, uint32_t desiredIp,
+               const char* magicPrefix)
 : Worker(tunnelMtu, deviceName, false, uid, gid), auth(passphrase)
 {
+    char m[16];
+    sprintf(m, "%sc", magicPrefix);
+    strcpy(Client::magic.data, m);
+    sprintf(m, "%ss", magicPrefix);
+    strcpy(Server::magic.data, m);
+
     this->serverIp = serverIp;
     this->clientIp = INADDR_NONE;
     this->desiredIp = desiredIp;

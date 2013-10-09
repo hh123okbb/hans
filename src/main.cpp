@@ -77,6 +77,7 @@ static void usage()
         "  -i            Change the echo id for every echo request.\n"
         "  -q            Change the echo sequence number for every echo request.\n"
         "  -a ip         Try to get assigned the given tunnel ip address.\n"
+        "  -n magic      Custom magic name. Used for nat traversal\n"
     );
 }
 
@@ -86,6 +87,7 @@ int main(int argc, char *argv[])
     const char *userName = NULL;
     const char *password = "";
     const char *device = NULL;
+    const char *magicPrefix = "han";
     bool isServer = false;
     bool isClient = false;
     bool foreground = false;
@@ -103,7 +105,7 @@ int main(int argc, char *argv[])
     openlog(argv[0], LOG_PERROR, LOG_DAEMON);
 
     int c;
-    while ((c = getopt(argc, argv, "fru:d:p:s:c:m:w:qiva:")) != -1)
+    while ((c = getopt(argc, argv, "fru:d:p:s:c:m:w:qiva:n:")) != -1)
     {
         switch(c) {
             case 'f':
@@ -149,6 +151,10 @@ int main(int argc, char *argv[])
                 break;
             case 'a':
                 clientIp = ntohl(inet_addr(optarg));
+                break;
+            case 'n':
+                magicPrefix = strdup(optarg);
+                memset(optarg, 0, strlen(optarg));
                 break;
             default:
                 usage();
@@ -200,7 +206,7 @@ int main(int argc, char *argv[])
     {
         if (isServer)
         {
-            worker = new Server(mtu, device, password, network, answerPing, uid, gid, 5000);
+            worker = new Server(mtu, device, password, network, answerPing, uid, gid, 5000, magicPrefix);
         }
         else
         {
@@ -217,7 +223,7 @@ int main(int argc, char *argv[])
                 serverIp = *(uint32_t *)he->h_addr;
             }
 
-            worker = new Client(mtu, device, ntohl(serverIp), maxPolls, password, uid, gid, changeEchoId, changeEchoSeq, clientIp);
+            worker = new Client(mtu, device, ntohl(serverIp), maxPolls, password, uid, gid, changeEchoId, changeEchoSeq, clientIp, magicPrefix);
         }
 
         if (!foreground)
